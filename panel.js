@@ -16,14 +16,17 @@
   const LIMIT = 3, DAY_CAP = 2.0, COST = 0.35;
   const css = document.createElement("style");
   css.textContent = `
-.tp{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:900;display:flex;align-items:center;gap:6px;padding:6px;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:999px;box-shadow:var(--sh-lg);transition:transform .3s var(--ease),opacity .25s}
-.tp.is-min{transform:translate(-50%,0) scale(1)}
-.tp button{border:0;border-radius:999px;padding:10px 18px;font:600 13px var(--font-sans);cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s,color .15s}
+.tp,.tpf{position:fixed;left:50%;bottom:22px;z-index:900;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s}
+.tp{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 8px;white-space:nowrap;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:999px;box-shadow:var(--sh-lg);transform:translate(-50%,0) scale(1);transform-origin:50% 100%}
+.tp.out{transform:translate(-50%,16px) scale(.6);opacity:0;pointer-events:none}
+.tp button,.tpf{border:0;font:600 13px var(--font-sans);cursor:pointer;outline:none}
+.tp button{border-radius:999px;padding:10px 18px;transition:transform .15s,box-shadow .15s,background .15s,color .15s}
 .tp .p{background:var(--brand);color:#fff}.tp .p:hover{transform:translateY(-1px);box-shadow:0 6px 16px color-mix(in srgb,var(--brand) 38%,transparent)}
 .tp .s{background:transparent;color:var(--text)}.tp .s:hover{background:var(--brand-soft);color:var(--brand)}
-.tp .h{width:36px;height:36px;padding:0;background:transparent;color:var(--text-muted);font-size:15px}.tp .h:hover{background:var(--surface-2);color:var(--text)}
-.tp__w{display:flex;align-items:center;gap:6px;max-width:520px;overflow:hidden;transition:max-width .3s var(--ease),opacity .2s}
-.tp.is-min .tp__w{max-width:0;opacity:0;pointer-events:none}.tp.is-min .h{transform:rotate(180deg)}
+.tp .h{width:34px;height:34px;padding:0;margin-left:2px;background:var(--surface-2);color:var(--text-muted);font-size:16px;line-height:1}.tp .h:hover{background:var(--brand-soft);color:var(--brand)}
+.tp button:focus-visible,.tpf:focus-visible{box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 35%,transparent)}
+.tpf{display:flex;align-items:center;justify-content:center;width:46px;height:46px;padding:0;border-radius:999px;background:var(--brand);color:#fff;font-size:22px;line-height:1;box-shadow:0 8px 22px color-mix(in srgb,var(--brand) 40%,transparent);transform:translate(-50%,16px) scale(.5);opacity:0;pointer-events:none;transform-origin:50% 100%}
+.tpf.on{transform:translate(-50%,0) scale(1);opacity:1;pointer-events:auto}.tpf.on:hover{transform:translate(-50%,-2px) scale(1.06)}
 .tpm{position:fixed;inset:0;z-index:950;background:rgba(10,14,30,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;animation:tpf .15s}
 .tpm__b{width:480px;max-width:92vw;background:var(--surface);color:var(--text);border-radius:22px;padding:26px;box-shadow:var(--sh-lg);font:14px var(--font-sans);animation:tpp .2s var(--ease)}
 @keyframes tpf{from{opacity:0}}@keyframes tpp{from{opacity:0;transform:translateY(10px) scale(.98)}}
@@ -52,17 +55,18 @@
     const [cs, sp] = await Promise.all([db.collection("calls").get(), db.collection("settings").doc("testSpend").get()]);
     N = cs.size; const s = sp.exists ? sp.data() : {}; SPEND = s.d===today() ? (s.v||0) : 0; paint();
   }
+  const fab = document.createElement("button"); fab.className="tpf"; fab.title="Показати меню"; fab.textContent="+"; document.body.appendChild(fab);
+  const setMin=m=>{ bar.classList.toggle("out",m); fab.classList.toggle("on",m); try{ localStorage.setItem(MIN_KEY,m?"1":"0"); }catch(_){} };
+  fab.onclick=()=>setMin(false);
   function paint(){
     bar.style.display="flex";
     let min=false; try{ min=localStorage.getItem(MIN_KEY)==="1"; }catch(_){}
-    bar.classList.toggle("is-min",min);
+    bar.classList.toggle("out",min); fab.classList.toggle("on",min);
     bar.replaceChildren();
-    const w=document.createElement("div"); w.className="tp__w";
     const a = document.createElement("button"); a.className="p"; a.textContent="+ Додати розмову"; a.onclick=openAdd;
     const b = document.createElement("button"); b.className="s"; b.textContent="Посилання клієнту"; b.onclick=share;
-    const h = document.createElement("button"); h.className="h"; h.title="Сховати / показати меню"; h.textContent="‹"; h.style.transform=min?"rotate(180deg)":"";
-    h.onclick=()=>{ const m=!bar.classList.contains("is-min"); bar.classList.toggle("is-min",m); h.style.transform=m?"rotate(180deg)":""; try{ localStorage.setItem(MIN_KEY,m?"1":"0"); }catch(_){} };
-    w.append(a,b); bar.append(h,w);
+    const h = document.createElement("button"); h.className="h"; h.title="Сховати меню"; h.textContent="×"; h.onclick=()=>setMin(true);
+    bar.append(a,b,h);
   }
   function modal(inner){ const m=document.createElement("div"); m.className="tpm"; m.innerHTML='<div class="tpm__b">'+inner+'</div>'; m.onclick=e=>{ if(e.target===m) m.remove(); }; document.body.appendChild(m); return m; }
   async function saveCall(id, pack){
@@ -115,7 +119,7 @@
   }
   // приклад-розмова створюється один раз; відкриваємо «Огляд», якщо хеш порожній
   firebase.auth().onAuthStateChanged(async u=>{
-    if(!u || (u.email||"").toLowerCase()!==window.PULT_OWNER.toLowerCase()){ bar.style.display="none"; return; }
+    if(!u || (u.email||"").toLowerCase()!==window.PULT_OWNER.toLowerCase()){ bar.style.display="none"; fab.classList.remove("on"); return; }
     db = firebase.firestore();
     try{
       await db.collection("users").doc(window.PULT_OWNER.toLowerCase()).set({ email:window.PULT_OWNER.toLowerCase(), name:"Влад", role:"developer", status:"active", uid:u.uid },{ merge:true });
