@@ -93,6 +93,12 @@ tbody tr{transition:background .12s}tbody tr:hover{background:var(--surface-2)}t
 .st li{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}.st li:last-child{border-bottom:0}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:9px;background:#22C55E}.dot.bad{background:var(--danger)}.dot.warn{background:#F59E0B}.dot.off{background:var(--text-faint)}
 .bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--accent-2));transition:width .5s}.bar i.warn{background:#F59E0B}.bar i.bad{background:var(--danger)}
+.pbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-4px 0 22px;padding:8px;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--sh-sm)}
+.pbar .ch{border:0;background:transparent;padding:7px 13px;border-radius:99px;font-weight:600;font-size:13px;color:var(--text-muted);cursor:pointer;transition:background .15s,color .15s}
+.pbar .ch:hover{background:var(--brand-soft);color:var(--brand)}.pbar .ch.on{background:var(--brand);color:#fff}
+.pbar .sp{flex:1}.pbar .dr{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:13px}
+.pbar input[type=date]{width:auto;padding:6px 10px;border-radius:99px;font-size:13px;color-scheme:dark light}
+.pbar .lbl{font-size:12.5px;color:var(--text-faint);padding:0 8px}
 .sech{margin:18px 0 6px;font-weight:600;font-size:13px}
 /* модалка + вхід */
 .mod{position:fixed;inset:0;z-index:100;background:rgba(10,14,30,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .15s}
@@ -126,6 +132,31 @@ const dm=s=>s.slice(8,10)+"."+s.slice(5,7);
 const dayDiff=(a,b)=>Math.round((new Date(a+"T12:00:00")-new Date(b+"T12:00:00"))/864e5);
 const fmtDT=iso=>{if(!iso)return"—";const d=new Date(iso);return isNaN(d)?"—":pad(d.getDate())+"."+pad(d.getMonth()+1)+" "+pad(d.getHours())+":"+pad(d.getMinutes())};
 const ago=ms=>{if(ms==null)return"";const m=Math.round(ms/6e4);return m<1?"щойно":m<60?m+" хв тому":m<1440?Math.round(m/60)+" год тому":Math.round(m/1440)+" дн тому"};
+
+/* ---------- Період ---------- */
+const PRESETS=[["today","Сьогодні"],["yest","Вчора"],["7","7 днів"],["30","30 днів"],["month","Цей місяць"],["prev","Минулий місяць"],["all","Весь час"]];
+function presetRange(k){ const t=today(), d=new Date();
+  if(k==="today")return[t,t]; if(k==="yest"){const y=addDays(t,-1);return[y,y]}
+  if(k==="7")return[addDays(t,-6),t]; if(k==="30")return[addDays(t,-29),t];
+  if(k==="month")return[t.slice(0,8)+"01",t];
+  if(k==="prev")return[ymd(new Date(d.getFullYear(),d.getMonth()-1,1)),ymd(new Date(d.getFullYear(),d.getMonth(),0))];
+  return["2025-01-01",t]; }
+let PERIOD=(()=>{try{const p=JSON.parse(localStorage.getItem("hubPeriod"));if(p&&p.k)return p}catch(_){}return{k:"30"}})();
+const curRange=()=>PERIOD.k==="custom"?[PERIOD.from,PERIOD.to]:presetRange(PERIOD.k);
+const isoRange=()=>{const[f,t]=curRange();return[new Date(f+"T00:00:00").toISOString(),new Date(t+"T23:59:59.999").toISOString()]};
+const inRange=v=>{ if(v==null)return false; const d=v.toDate?v.toDate():new Date(v); if(isNaN(d))return false; const[f,t]=curRange(),k=ymd(d); return k>=f&&k<=t; };
+const rangeText=()=>{const[f,t]=curRange();return PERIOD.k==="all"?"за весь час":f===t?dm(f)+"."+f.slice(0,4):dm(f)+"."+f.slice(2,4)+" — "+dm(t)+"."+t.slice(2,4)};
+const monthsIn=()=>{const[f,t]=curRange(),out=[];let y=+f.slice(0,4),m=+f.slice(5,7);const ey=+t.slice(0,4),em=+t.slice(5,7);while(y<ey||(y===ey&&m<=em)){out.push(y+"-"+pad(m));if(++m>12){m=1;y++}if(out.length>60)break}return out};
+function setPeriod(k,from,to){ PERIOD=k==="custom"?{k,from,to}:{k}; try{localStorage.setItem("hubPeriod",JSON.stringify(PERIOD))}catch(_){}
+  SPACES().forEach(sp=>{const A=APPS[sp.id]; if(A&&A.au.currentUser)loadSpace(sp)}); loadTest(); rerender(); }
+function periodBar(){
+  const[f,t]=curRange();
+  const fi=el("input",{class:"in",type:"date",value:f,max:t}), ti=el("input",{class:"in",type:"date",value:t});
+  const go=()=>{ if(fi.value&&ti.value){ const a=fi.value<=ti.value?[fi.value,ti.value]:[ti.value,fi.value]; setPeriod("custom",a[0],a[1]); } };
+  fi.onchange=go; ti.onchange=go;
+  return el("div",{class:"pbar"},PRESETS.map(([k,l])=>el("button",{class:"ch"+(PERIOD.k===k?" on":""),onclick:()=>setPeriod(k)},l)),
+    el("span",{class:"sp"}),el("div",{class:"dr"},"від",fi,"до",ti),el("span",{class:"lbl"},rangeText()));
+}
 
 /* ---------- Firebase хабу ---------- */
 firebase.initializeApp(FB_CONFIG);
@@ -170,8 +201,8 @@ function humanErr(c){
 async function loadSpace(sp){
   const s=sd(sp.id), A=APPS[sp.id]; s.state="loading"; rerender();
   try{
-    const since=new Date(Date.now()-30*864e5).toISOString(), mk=new Date().toISOString().slice(0,7);
-    const [cs,us,hs,ai,uu]=await Promise.all([A.db.collection("calls").where("startedAt",">=",since).get(),A.db.collection("users").get(),A.db.collection("health").doc("server").get(),A.db.collection("settings").doc("ai").get(),A.db.collection("usage").doc(mk).get()]);
+    const[iso0,iso1]=isoRange(), months=monthsIn();
+    const [cs,us,hs,ai,uu]=await Promise.all([A.db.collection("calls").where("startedAt",">=",iso0).where("startedAt","<=",iso1).get(),A.db.collection("users").get(),A.db.collection("health").doc("server").get(),A.db.collection("settings").doc("ai").get(),Promise.all(months.map(m=>A.db.collection("usage").doc(m).get()))]);
     const calls=cs.docs.map(x=>Object.assign({id:x.id},x.data())).filter(c=>c.kind!=="admin_meeting"&&c.status!=="canceled");
     const done=calls.filter(c=>c.status==="done"&&c.score!=null);
     s.calls=calls.length; s.avg=done.length?Math.round(done.reduce((q,c)=>q+(c.score||0),0)/done.length):null;
@@ -183,15 +214,15 @@ async function loadSpace(sp){
     const h=hs.exists?hs.data():null; s.hStatus=h?String(h.status||"ok"):null; s.hMsg=h&&typeof h.message==="string"&&/[А-Яа-я]/.test(h.message)?h.message:"";
     const t=h&&h.checkedAt&&h.checkedAt.toDate?h.checkedAt.toDate():null; s.hAge=t?Date.now()-t.getTime():null;
     if(s.hAge!=null&&s.hAge>3*36e5)s.hStatus="error";
-    const u=uu.exists?uu.data():{}; s.spent=Math.max(Number(u.analysisCostUsd||0)+Number(u.chatCostUsd||0),Number(u.realCostUsd||0));
-    s.limit=(ai.exists&&ai.data().limitUsd)?Number(ai.data().limitUsd):10;
+    s.spent=uu.reduce((q,d)=>{const u=d.exists?d.data():{};return q+Math.max(Number(u.analysisCostUsd||0)+Number(u.chatCostUsd||0),Number(u.realCostUsd||0))},0);
+    s.limit=((ai.exists&&ai.data().limitUsd)?Number(ai.data().limitUsd):10)*months.length;
     s.state="ok"; s.err="";
   }catch(e){ s.state="err"; s.err=(e.code==="permission-denied")?"Цей акаунт не має доступу до даних простору (потрібна роль розробника чи адміна).":(e.message||"Помилка"); }
   rerender();
 }
 async function loadTest(){
   try{ const [c,s,sp]=await Promise.all([db.collection("calls").get(),db.collection("shared").get(),db.collection("settings").doc("testSpend").get()]);
-    const d=sp.exists?sp.data():{}; TS.calls=c.size; TS.shared=s.size; TS.spend=d.d===today()?(d.v||0):0; }catch(e){ TS.calls=0; }
+    const d=sp.exists?sp.data():{}; TS.calls=c.docs.filter(x=>inRange(x.data().startedAt)).length; TS.shared=s.docs.filter(x=>inRange(x.data().createdAt)).length; TS.spend=d.d===today()?(d.v||0):0; }catch(e){ TS.calls=0; }
   rerender();
 }
 ping(new URL("test.html",location.href).href).then(r=>{TS.site=r;rerender()});
@@ -256,7 +287,7 @@ function app(){
       el("button",{class:"ib",title:"Тема",onclick:()=>theme(root.getAttribute("data-theme")==="dark"?"light":"dark")},"◐"),
       el("button",{class:"btn s sm",onclick:()=>auth.signOut()},"Вийти")));
   const body=el("div",{});
-  ({spaces,crm,status})[tab](body);
+  ({spaces,crm,status})[tab](body); body.insertBefore(periodBar(),body.children[2]||null);
   document.title=(n?"("+n+") ":"")+"Хаб";
   const y=window.scrollY;
   $("#app").replaceChildren(el("div",{class:"wrap"},nav,body)); window.scrollTo(0,y);
@@ -301,16 +332,16 @@ function spaces(b){
     el("a",{class:"go",href:o.href,target:"_blank"},el("span",{},"Відкрити простір"),el("span",{},"→")));
   const sp2=sp=>{
     const s=sd(sp.id), has=!!sp.cfg, v=x=>x==null?"—":String(x);
-    let nums=[["—","розмов за 30 днів"],["—","менеджерів"],["—","середня оцінка"]], extra=null;
+    let nums=[["—","розмов за період"],["—","менеджерів"],["—","середня оцінка"]], extra=null;
     if(!has) extra=el("div",{class:"note"},"Живі цифри не підключені: додай Firebase-конфіг, щоб бачити розмови й оцінки.");
-    else if(s.state==="ok") nums=[[v(s.calls),"розмов за 30 днів"],[v(s.mgrs),"менеджерів"],[s.avg==null?"—":s.avg+"%","середня оцінка"]];
-    else if(s.state==="loading"||s.state==="idle") nums=[["…","розмов за 30 днів"],["…","менеджерів"],["…","середня оцінка"]];
+    else if(s.state==="ok") nums=[[v(s.calls),"розмов за період"],[v(s.mgrs),"менеджерів"],[s.avg==null?"—":s.avg+"%","середня оцінка"]];
+    else if(s.state==="loading"||s.state==="idle") nums=[["…","розмов за період"],["…","менеджерів"],["…","середня оцінка"]];
     else extra=el("div",{},s.state==="err"?el("div",{class:"err"},s.err):null,connectForm(sp));
     return tile({id:sp.id,name:sp.name,kind:sp.kind,href:sp.url,nums:has?nums:null,extra,del:!sp.builtin});
   };
   b.append(el("h1",{},"Робочі простори"),el("div",{class:"sub"},"Кожен простір — окремий сайт зі своєю базою. Тут посилання і живі цифри з їхніх баз."),
     el("div",{class:"grid"},SPACES().map(sp2),
-      tile({name:"Тест",kind:"Тест",cls:"test",href:"test.html",nums:[[TS.calls==null?"…":String(TS.calls),"розмов"],[TS.calls==null?"…":String(TS.shared),"посилань видано"],[TS.calls==null?"…":TS.spend.toFixed(2)+" $","ШІ сьогодні"]]}),
+      tile({name:"Тест",kind:"Тест",cls:"test",href:"test.html",nums:[[TS.calls==null?"…":String(TS.calls),"розмов за період"],[TS.calls==null?"…":String(TS.shared),"посилань за період"],[TS.calls==null?"…":TS.spend.toFixed(2)+" $","ШІ сьогодні"]]}),
       el("div",{class:"card tile add",onclick:addSpaceModal,title:"Додати робочий простір"},el("i",{},"+"),el("span",{},"Додати простір"))));
 }
 
@@ -318,6 +349,7 @@ function spaces(b){
 function crm(b){
   const t=today(), open=l=>!CLOSED.has(l.st);
   const c=crmCounts();
+  const inP=LEADS.filter(l=>inRange(l.created)), paidP=LEADS.filter(l=>l.st==="Оплатив"&&inRange(l.statusAt||l.created)), lostP=LEADS.filter(l=>l.st==="Відмова"&&inRange(l.statusAt||l.created));
   const todo=[]; LEADS.filter(open).forEach(l=>l.touches.forEach((x,i)=>{ if(!x.done&&x.d<=t)todo.push({l,i,x,over:x.d<t}) }));
   todo.sort((a,b2)=>a.x.d.localeCompare(b2.x.d));
   const ended=LEADS.filter(l=>open(l)&&l.touches.length&&l.touches.every(x=>x.done));
@@ -337,21 +369,23 @@ function crm(b){
     el("div",{class:"kpis"},
       el("div",{class:"card kpi"+(c.over?" red":"")},el("b",{},String(c.over)),el("span",{},"прострочено")),
       el("div",{class:"card kpi"+(c.tod?" amb":"")},el("b",{},String(c.tod)),el("span",{},"написати сьогодні")),
-      el("div",{class:"card kpi"},el("b",{},String(LEADS.filter(open).length)),el("span",{},"у роботі")),
-      el("div",{class:"card kpi"},el("b",{},String(LEADS.filter(l=>l.st==="Оплатив").length)),el("span",{},"оплатили"))),
+      el("div",{class:"card kpi"},el("b",{},String(LEADS.filter(open).length)),el("span",{},"у роботі зараз")),
+      el("div",{class:"card kpi"},el("b",{},String(inP.length)),el("span",{},"нових за період")),
+      el("div",{class:"card kpi"},el("b",{},String(paidP.length)),el("span",{},"оплатили за період")),
+      el("div",{class:"card kpi"},el("b",{},String(lostP.length)),el("span",{},"відмов за період"))),
     el("h2.sec".replace(".sec",""),{class:"sec"},"Що зробити зараз"),
     todo.length?el("div",{class:"todo"},todo.map(item)):el("div",{class:"empty"},"На сьогодні все. Прострочених немає."),
     ended.length?el("div",{class:"note",style:"margin-top:12px"},"Серію завершено, а рішення немає: "+ended.map(l=>l.name).join(", ")+". Постав «Відмова» або новий етап, щоб серія почалась знову."):el("span"),
     el("h2",{class:"sec"},"Новий лід"),
     el("div",{class:"card"},el("div",{class:"row"},el("div",{style:"flex:1.4"},el("label",{class:"l"},"Хто"),name),el("div",{},el("label",{class:"l"},"Канал"),ch),el("div",{},el("label",{class:"l"},"Контакт"),contact),el("div",{},el("label",{class:"l"},"Етап"),st)),
       el("div",{class:"row",style:"margin-top:12px"},el("div",{style:"flex:3"},el("label",{class:"l"},"Нотатка"),note),el("div",{style:"flex:0;min-width:auto"},el("button",{class:"btn",onclick:add},"Додати")))),
-    el("h2",{class:"sec"},"Усі ліди ("+LEADS.length+")"),
-    el("div",{class:"card",style:"padding:8px 14px"},LEADS.length?el("table",{},el("thead",{},el("tr",{},["Хто","Етап","Дотики","Нотатка",""].map(h=>el("th",{},h)))),
-      el("tbody",{},LEADS.map(l=>el("tr",{},
+    el("h2",{class:"sec"},"Ліди за період ("+inP.length+" з "+LEADS.length+")"),
+    el("div",{class:"card",style:"padding:8px 14px"},inP.length?el("table",{},el("thead",{},el("tr",{},["Хто","Етап","Дотики","Нотатка",""].map(h=>el("th",{},h)))),
+      el("tbody",{},inP.map(l=>el("tr",{},
         el("td",{},el("b",{},l.name),el("div",{class:"note"},l.ch+(l.contact?" · "+l.contact:""))),
         el("td",{},stSel(l)),el("td",{},chips(l)),
         el("td",{style:"min-width:200px"},el("input",{class:"in",value:l.note,onchange:e=>db.collection("leads").doc(l.id).update({note:e.target.value})})),
-        el("td",{},el("button",{class:"btn d",title:"Видалити",onclick:()=>{if(confirm("Видалити «"+l.name+"»?"))db.collection("leads").doc(l.id).delete()}},"✕")))))):el("div",{class:"empty",style:"border:0"},"Лідів поки немає.")));
+        el("td",{},el("button",{class:"btn d",title:"Видалити",onclick:()=>{if(confirm("Видалити «"+l.name+"»?"))db.collection("leads").doc(l.id).delete()}},"✕")))))):el("div",{class:"empty",style:"border:0"},"За цей період лідів немає.")));
 }
 
 /* ---------- Статуси ---------- */
@@ -366,22 +400,22 @@ function status(b){
       el("div",{class:"tile__h",style:"margin-bottom:10px"},el("div",{class:"tile__n"},w.n),el("span",{class:"chip "+(worst==="ok"?"ok":worst==="off"?"":worst)},worst==="ok"?"усе гаразд":worst==="off"?"немає даних":worst==="bad"?"проблема":"є зауваження")),
       el("ul",{class:"st"},w.rows.map(([l,s,d])=>el("li",{},el("span",{},dot(s),l),el("span",{class:"me"},d||lab[s]))),w.facts.map(([l,v])=>el("li",{},el("span",{},l),el("b",{},v)))),
       w.used!=null?el("div",{},el("div",{class:"sech",style:"display:flex;justify-content:space-between"},el("span",{},w.key),el("b",{},w.used.toFixed(2)+" / "+w.lim+" $")),el("div",{class:"bar"},el("i",{class:cls,style:"width:"+pct+"%"})),w.fc?el("div",{class:"hint"},w.fc):null):null,
-      w.fails?el("div",{},el("div",{class:"sech"},"Останні збої"),w.fails.length?el("ul",{class:"st"},w.fails.map(f=>el("li",{},el("span",{},f[1]),el("span",{class:"me"},f[0])))):el("div",{class:"note"},"Збоїв за 30 днів немає.")):null,
+      w.fails?el("div",{},el("div",{class:"sech"},"Останні збої"),w.fails.length?el("ul",{class:"st"},w.fails.map(f=>el("li",{},el("span",{},f[1]),el("span",{class:"me"},f[0])))):el("div",{class:"note"},"Збоїв за період немає.")):null,
       w.need?el("div",{class:"note",style:"margin-top:12px"},w.need):null);
   };
   const cards=SPACES().map(sp=>{
     const s=sd(sp.id), live=s.state==="ok", hs=live?sv(s.hStatus):"off";
     const dayN=new Date().getDate(), dim=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
-    const proj=live&&s.spent>0?s.spent/dayN*dim:null;
+    const proj=live&&PERIOD.k==="month"&&s.spent>0?s.spent/dayN*dim:null;
     return card({n:sp.name,
       rows:[["Сайт",sd(sp.id).site||"off"],["Сервер і воркер",hs,live?(s.hMsg||(hs==="ok"?"працює":hs==="warn"?"є зауваження":"проблема"))+(s.hAge!=null?" · "+ago(s.hAge):""):null]],
-      facts:live?[["У черзі й обробці",String(s.queue)],["Помилок за 30 днів",String(s.errCount)],["Остання розмова",s.last?fmtDT(s.last):"—"]]:[],
-      warn:live&&s.errCount>0, key:"Витрати ШІ цього місяця",used:live?s.spent:null,lim:s.limit,
+      facts:live?[["У черзі й обробці",String(s.queue)],["Помилок за період",String(s.errCount)],["Остання розмова",s.last?fmtDT(s.last):"—"]]:[],
+      warn:live&&s.errCount>0, key:"Витрати ШІ за період",used:live?s.spent:null,lim:s.limit,
       fc:proj!=null?"Прогноз на місяць: ~"+proj.toFixed(2)+" $"+(proj>s.limit?" — перевищить ліміт":""):null,
       fails:live?s.fails:null, need:live?null:(sp.cfg?"Підключи простір у вкладці «Робочі простори», щоб бачити сервер, чергу й витрати.":"Без Firebase-конфігу доступна лише перевірка сайту.")});
   });
   const t=TS, tl=t.calls!=null;
-  cards.push(card({n:"Тест",rows:[["Сайт",t.site||"off"],["База",tl?"ok":"off"]],facts:tl?[["Розмов створено",String(t.calls)],["Посилань видано",String(t.shared)]]:[],key:"Витрати ШІ сьогодні",used:tl?t.spend:null,lim:2,fails:null}));
+  cards.push(card({n:"Тест",rows:[["Сайт",t.site||"off"],["База",tl?"ok":"off"]],facts:tl?[["Розмов за період",String(t.calls)],["Посилань за період",String(t.shared)]]:[],key:"Витрати ШІ сьогодні",used:tl?t.spend:null,lim:2,fails:null}));
   b.append(el("h1",{},"Статуси"),el("div",{class:"sub"},"Чи живі простори, що в черзі, де збої і скільки витрачено на ШІ. Усе береться з їхніх сайтів і баз, без кодів."),el("div",{class:"grid"},cards));
 }
 </script>
