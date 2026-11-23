@@ -1,0 +1,110 @@
+/* Design tokens. Light theme only (per decision 2026-10-21).
+   Dark theme values stay commented for later — do NOT delete.
+   Reference: TZ §7, light palette.
+*/
+:root[data-theme="light"] {
+  /* Surfaces */
+  --bg:           #F3F5FB;
+  --surface:     #FFFFFF;
+  --surface-2:   #F7F9FD;   /* subtle card bg */
+  --border:      #E4E7EF;
+  --border-strong:#D4D9E4;
+
+  /* Text */
+  --text:        #151A2E;
+  --text-muted:  #667085;
+  --text-faint:  #98A2B3;
+
+  /* Brand */
+  --brand:       #3B5BDB;
+  --brand-hover: #2F4AC0;
+  --brand-soft:  #E8EEFF;    /* chip bg for timecodes etc. */
+  --accent-2:    #8B5CF6;    /* violet, used in charts / objections */
+
+  /* Semantic */
+  --success:     #22C55E;
+  --success-soft:#E7F6EE;
+  --warn:        #F5B301;
+  --warn-soft:   #FFF6DD;
+  --danger:      #EF4444;
+  --danger-soft: #FDECEC;
+  --info:        #3B82F6;
+  --info-soft:   #E8F0FE;
+
+  /* Status chip palettes (per design 222.jpeg) */
+  --chip-done-bg:        #DCFCE7;
+  --chip-done-text:      #166534;
+  --chip-trans-bg:       #DBEAFE;
+  --chip-trans-text:     #1E40AF;
+  --chip-analysis-bg:    #EDE9FE;
+  --chip-analysis-text:  #5B21B6;
+  --chip-error-bg:       #FEE2E2;
+  --chip-error-text:     #991B1B;
+  --chip-queue-bg:       #F1F5F9;
+  --chip-queue-text:     #475569;
+
+  /* Score ring thresholds — logic in JS, colors here */
+  --score-good:   var(--success);
+  --score-mid:    var(--warn);
+  --score-bad:    var(--danger);
+
+  /* Radii */
+  --r-pill: 999px;
+  --r-lg:   16px;
+  --r-md:   12px;
+  --r-sm:   10px;
+  --r-xs:   8px;
+
+  /* Spacing (8-pt grid) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10:40px;
+
+  /* Shadows */
+  --sh-sm: 0 1px 2px rgba(16,24,40,.06);
+  --sh-md: 0 4px 16px rgba(16,24,40,.08);
+  --sh-lg: 0 12px 32px rgba(16,24,40,.10);
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur:      180ms;
+  --ease:     cubic-bezier(.2,.7,.2,1);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;   /* base */
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl:28px;
+  --fs-3xl:34px;
+
+  /* Layout */
+  --navbar-h: 64px;
+  --page-max: 1360px;
+}
+
+/* ===== DARK THEME (не включено, пока светлая) =====
+:root[data-theme="dark"] {
+  --bg:          #0B1020;
+  --surface:     #141A33;
+  --text:        #E8ECFA;
+  --brand:       #2D8CFF;
+  --accent-2:    #8B5CF6;
+  --success:     #22C55E;
+  --warn:        #F5B301;
+  --danger:      #EF4444;
+  ...
+}
+===== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="light"] { --dur-fast: 0ms; --dur: 0ms; }
+}

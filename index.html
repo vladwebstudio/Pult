@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Пульт · робочі простори</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 var(--font-sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--page-max);margin:0 auto;padding:0 var(--s-5) 60px}
+.navbar{height:var(--navbar-h);background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-sm);display:flex;align-items:center;gap:var(--s-4);padding:0 var(--s-5);margin:var(--s-5) 0 0}
+.logo{display:flex;align-items:center;gap:var(--s-2);font-weight:700;padding-right:var(--s-4)}
+.logo i{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--brand),var(--accent-2));display:inline-block}
+.menu{display:flex;gap:var(--s-1);flex:1}
+.menu button{border:0;background:transparent;padding:8px 14px;border-radius:var(--r-pill);color:var(--text-muted);font-weight:500;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+.menu button:hover{background:var(--brand-soft);color:var(--brand)}
+.menu button.on{background:var(--brand);color:#fff}
+.act{display:flex;align-items:center;gap:var(--s-3)}
+.ib{width:36px;height:36px;border-radius:var(--r-pill);border:0;background:transparent;color:var(--text-muted);cursor:pointer;font-size:16px}
+.ib:hover{background:var(--surface-2);color:var(--text)}
+.me{font-size:13px;color:var(--text-muted)}
+h1{font-size:var(--fs-2xl);letter-spacing:-.02em;margin:var(--s-6) 0 4px}
+.sub{color:var(--text-muted);margin-bottom:var(--s-5)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:var(--s-5);box-shadow:var(--sh-sm)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:var(--s-5)}
+.tile{display:flex;flex-direction:column;gap:var(--s-4);transition:transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),border-color var(--dur)}
+.tile:hover{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:var(--brand)}
+.tile__h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tile__n{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.chip{display:inline-block;padding:3px 10px;border-radius:var(--r-pill);font-size:12px;font-weight:600;background:var(--brand-soft);color:var(--brand)}
+.chip.test{background:#FEF3C7;color:#92400E}
+.chip.ok{background:var(--chip-done-bg);color:var(--chip-done-text)}.chip.bad{background:var(--chip-error-bg);color:var(--chip-error-text)}.chip.warn{background:#FEF3C7;color:#92400E}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3)}
+.num b{display:block;font-size:22px;font-weight:700;letter-spacing:-.02em}.num span{font-size:12px;color:var(--text-muted)}
+.go{margin-top:auto;display:flex;align-items:center;justify-content:space-between;color:var(--brand);font-weight:600}
+.empty-note{color:var(--text-faint);font-size:12.5px;margin-top:var(--s-5)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:var(--text-muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.in{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg)}
+.btn{border:0;border-radius:var(--r-pill);padding:9px 16px;font-weight:600;cursor:pointer;background:var(--brand);color:#fff}
+.btn.s{background:var(--brand-soft);color:var(--brand)}.btn.d{background:transparent;color:var(--danger);padding:6px 10px}
+.row{display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:flex-end}.row>div{flex:1;min-width:140px}
+.row label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:4px}
+.kpis{display:flex;gap:var(--s-4);margin-bottom:var(--s-5);flex-wrap:wrap}.kpi{flex:1;min-width:160px}
+.kpi b{font-size:26px;letter-spacing:-.02em}.kpi span{display:block;color:var(--text-muted);font-size:12.5px}
+.late{color:var(--danger);font-weight:600}
+.bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--accent-2));border-radius:99px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:var(--success,#22C55E)}.dot.bad{background:var(--danger)}.dot.warn{background:#F59E0B}
+.st{display:flex;flex-direction:column;gap:var(--s-3)}.st li{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}.st{padding:0;margin:0}.st li:last-child{border:0}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.login .card{width:380px;max-width:100%}
+.err{color:var(--danger);font-size:13px;min-height:18px;margin-top:8px}
+.demo{display:inline-block;margin-left:8px;font-size:11px;color:var(--text-faint);font-weight:500}
+@media(max-width:700px){.menu button{padding:8px 10px}.nums{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const $ = (s,r=document)=>r.querySelector(s);
+const el=(t,a={},...c)=>{const n=document.createElement(t);Object.entries(a).forEach(([k,v])=>{if(k==="class")n.className=v;else if(k.startsWith("on"))n[k]=v;else if(v!=null)n.setAttribute(k,v)});c.flat().forEach(x=>{if(x==null)return;n.append(x.nodeType?x:document.createTextNode(x))});return n};
+const root=document.documentElement;
+function theme(t){root.setAttribute("data-theme",t);try{localStorage.setItem("alexa_theme",t)}catch(_){}}
+theme((()=>{try{return localStorage.getItem("alexa_theme")||"light"}catch(_){return"light"}})());
+
+firebase.initializeApp(FB_CONFIG);
+const auth=firebase.auth(), db=firebase.firestore();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+const OWNER=PULT_OWNER.toLowerCase();
+const ALEXA_URL="https://vladwebstudio.github.io/Aleksa/#/overview";
+let tab=(()=>{try{return localStorage.getItem("hubTab")||"spaces"}catch(_){return"spaces"}})();
+let LEADS=[], leadsUnsub=null;
+
+auth.onAuthStateChanged(async u=>{
+  if(u && (u.email||"").toLowerCase()===OWNER){
+    try{ await db.collection("users").doc(OWNER).set({email:OWNER,name:"Влад",role:"developer",status:"active",uid:u.uid},{merge:true}); }catch(e){ console.warn(e); }
+    if(!leadsUnsub) leadsUnsub=db.collection("leads").orderBy("created","desc").onSnapshot(sn=>{ LEADS=sn.docs.map(d=>Object.assign({id:d.id},d.data())); if(tab==="crm"&&$(".navbar")) app(); },e=>console.warn(e));
+    app();
+  } else { if(u) auth.signOut(); if(leadsUnsub){leadsUnsub();leadsUnsub=null} login(); }
+});
+$("#app").replaceChildren(el("div",{class:"login"},"Завантаження…"));
+
+/* ---------- Вхід (Firebase Auth, лише власник) ---------- */
+function login(){
+  const err=el("div",{class:"err"}), em=el("input",{class:"in",value:OWNER,type:"email"}), pw=el("input",{class:"in",type:"password",placeholder:"Пароль"});
+  const msg=e=>{const c=e.code||""; return c.includes("wrong-password")||c.includes("invalid-credential")?"Невірний пароль.":c.includes("user-not-found")?"Акаунта ще немає — натисніть «Перший вхід».":c.includes("weak-password")?"Пароль закороткий (мінімум 6 символів).":c.includes("email-already")?"Акаунт уже створено — просто увійдіть.":(e.message||String(e))};
+  const chk=()=>{ if(em.value.trim().toLowerCase()!==OWNER){err.textContent="Доступ лише для власника.";return false} err.textContent="";return true };
+  const go=()=>{ if(!chk())return; auth.signInWithEmailAndPassword(OWNER,pw.value).catch(e=>err.textContent=msg(e)) };
+  const first=()=>{ if(!chk())return; auth.createUserWithEmailAndPassword(OWNER,pw.value).catch(e=>err.textContent=msg(e)) };
+  pw.onkeydown=e=>{if(e.key==="Enter")go()};
+  $("#app").replaceChildren(el("div",{class:"login"},el("div",{class:"card"},
+    el("div",{class:"logo",style:"margin-bottom:18px"},el("i"),"Пульт"),
+    el("h2",{style:"margin:0 0 4px;font-size:22px;letter-spacing:-.02em"},"Вхід"),
+    el("div",{class:"sub",style:"margin-bottom:16px"},"Простір, у який заходить лише власник."),
+    em,el("div",{style:"height:10px"}),pw,err,el("div",{style:"height:12px"}),
+    el("button",{class:"btn",style:"width:100%",onclick:go},"Увійти"),
+    el("button",{class:"btn s",style:"width:100%;margin-top:8px",onclick:first},"Перший вхід: створити пароль"))));
+}
+function app(){
+  const tabs=[["spaces","Робочі простори"],["crm","Міні-CRM"],["status","Статуси"]];
+  const nav=el("nav",{class:"navbar"},el("div",{class:"logo"},el("i"),"Пульт"),
+    el("div",{class:"menu"},tabs.map(([k,l])=>el("button",{class:tab===k?"on":"",onclick:()=>{tab=k;try{localStorage.setItem("hubTab",k)}catch(_){}app()}},l))),
+    el("div",{class:"act"},el("span",{class:"me"},OWNER),
+      el("button",{class:"ib",title:"Тема",onclick:()=>{theme(root.getAttribute("data-theme")==="dark"?"light":"dark")}},"◐"),
+      el("button",{class:"btn s",onclick:()=>auth.signOut()},"Вийти")));
+  const body=el("div",{});
+  ({spaces,crm,status})[tab](body);
+  $("#app").replaceChildren(el("div",{class:"wrap"},nav,body));
+}
+const today=()=>new Date().toISOString().slice(0,10);
+async function testStats(){
+  try{ const [c,s,sp]=await Promise.all([db.collection("calls").get(),db.collection("shared").get(),db.collection("settings").doc("testSpend").get()]);
+    const d=sp.exists?sp.data():{}; return {calls:c.size,shared:s.size,spend:d.d===today()?(d.v||0):0}; }catch(e){ return {calls:0,shared:0,spend:0}; }
+}
+
+/* ---------- Робочі простори ---------- */
+function spaces(b){
+  const tile=(href,name,chip,cls,nums)=>el("a",{class:"card tile",href,target:"_blank"},
+    el("div",{class:"tile__h"},el("div",{class:"tile__n"},name),el("span",{class:"chip "+cls},chip)),
+    el("div",{class:"nums"},nums.map(([v,l,id])=>el("div",{class:"num"},el("b",{id},v),el("span",{},l)))),
+    el("div",{class:"go"},el("span",{},"Відкрити простір"),el("span",{},"→")));
+  b.append(el("h1",{},"Робочі простори"),el("div",{class:"sub"},"Кожен — окремий сайт зі своєю базою. Тут лише посилання і кілька цифр."),
+    el("div",{class:"grid"},
+      tile(ALEXA_URL,"Алекса","Клієнт · Інфобізнес","",[["—","розмов за місяць"],["—","менеджерів"],["—","середня оцінка"]]),
+      tile("test.html","Тест","Тест","test",[["…","розмов","t1"],["…","посилань видано","t2"],["…","ШІ сьогодні","t3"]])),
+    el("div",{class:"empty-note"},"Цифри Алекси підтягнемо з її бази пізніше. Кнопки «додати простір» немає, поки не з’явиться перший клієнт."));
+  testStats().then(s=>{ const set=(i,v)=>{const n=$("#"+i); if(n)n.textContent=v}; set("t1",s.calls+" з 3"); set("t2",String(s.shared)); set("t3",s.spend.toFixed(2)+" $"); });
+}
+
+/* ---------- Міні-CRM ---------- */
+const STAGES=["Написав","Відповів","Тест надіслано","Розмова","Оплатив","Відмова"];
+const CH=["Instagram","Telegram","Viber","Інше"];
+function crm(b){
+  const L=LEADS, t=today();
+  const open=x=>x.st!=="Оплатив"&&x.st!=="Відмова";
+  const due=L.filter(x=>x.next===t&&open(x)).length, late=L.filter(x=>x.next&&x.next<t&&open(x)).length;
+  const upd=(x,p)=>db.collection("leads").doc(x.id).update(p).catch(e=>alert(e.message));
+  const n=el("input",{class:"in",placeholder:"Хто написав"}), c=el("select",{class:"in"},CH.map(x=>el("option",{},x))), s=el("select",{class:"in"},STAGES.map(x=>el("option",{},x))), d=el("input",{class:"in",type:"date",value:t}), nt=el("input",{class:"in",placeholder:"Нотатка"});
+  const add=()=>{ if(!n.value.trim())return; db.collection("leads").add({name:n.value.trim(),ch:c.value,st:s.value,next:d.value,note:nt.value,created:Date.now()}).catch(e=>alert(e.message)) };
+  b.append(el("h1",{},"Міні-CRM"),el("div",{class:"sub"},"Хто написав, на якому етапі, коли наступний контакт. Дані зберігаються в базі хабу."),
+    el("div",{class:"kpis"},el("div",{class:"card kpi"},el("b",{},String(L.length)),el("span",{},"усього лідів")),el("div",{class:"card kpi"},el("b",{},String(due)),el("span",{},"зв’язатись сьогодні")),el("div",{class:"card kpi"},el("b",{class:late?"late":""},String(late)),el("span",{},"прострочено"))),
+    el("div",{class:"card",style:"margin-bottom:20px"},el("div",{class:"row"},el("div",{style:"flex:2"},el("label",{},"Хто"),n),el("div",{},el("label",{},"Канал"),c),el("div",{},el("label",{},"Етап"),s),el("div",{},el("label",{},"Наступний контакт"),d),el("div",{style:"flex:2"},el("label",{},"Нотатка"),nt),el("div",{style:"flex:none;min-width:0"},el("button",{class:"btn",onclick:add},"Додати")))),
+    el("div",{class:"card",style:"padding:8px 12px"},L.length?el("table",{},el("thead",{},el("tr",{},["Хто","Канал","Етап","Наступний контакт","Нотатка",""].map(h=>el("th",{},h)))),
+      el("tbody",{},L.map(x=>{ const isLate=open(x)&&x.next&&x.next<t;
+        const sel=el("select",{class:"in",onchange:e=>upd(x,{st:e.target.value})},STAGES.map(v=>el("option",{selected:v===x.st?"":null},v)));
+        const dt=el("input",{class:"in"+(isLate?" late":""),type:"date",value:x.next||"",onchange:e=>upd(x,{next:e.target.value})});
+        const ni=el("input",{class:"in",value:x.note||"",onchange:e=>upd(x,{note:e.target.value})});
+        return el("tr",{},el("td",{},el("b",{},x.name)),el("td",{},x.ch),el("td",{},sel),el("td",{},dt),el("td",{},ni),el("td",{},el("button",{class:"btn d",onclick:()=>db.collection("leads").doc(x.id).delete()},"Видалити")))}))):el("div",{class:"me",style:"padding:14px"},"Лідів ще немає. Додайте першого.")));
+}
+
+/* ---------- Статуси ---------- */
+function status(b){
+  const WS=[{n:"Алекса",site:"ok",srv:"ok",wk:"ok",key:"Ключ Алекси",used:12.4,lim:30,fails:[["Вчора 21:14","Транскрипція: таймаут, повтор вдався"]],demo:true},
+            {n:"Тест",site:"ok",srv:"ok",wk:"warn",key:"Ключ тесту",used:0,lim:2,fails:[],id:"s3"}];
+  const dot=s=>el("span",{class:"dot "+(s==="ok"?"":s)});
+  const lab={ok:"працює",warn:"повільно",bad:"не відповідає"};
+  b.append(el("h1",{},"Статуси",el("span",{class:"demo"},"поки що частково демо-дані")),el("div",{class:"sub"},"Чи живі простори, скільки витрачено ШІ і що впало. Далі тягнемо з блоку «Сервер» кожного простору."),
+    el("div",{class:"grid"},WS.map(w=>el("div",{class:"card"},
+      el("div",{class:"tile__h",style:"margin-bottom:12px"},el("div",{class:"tile__n"},w.n),el("span",{class:"chip "+(w.wk==="ok"?"ok":"warn")},w.wk==="ok"?"усе гаразд":"є зауваження")),
+      el("ul",{class:"st"},[["Сайт",w.site],["Сервер",w.srv],["Воркер",w.wk]].map(([l,s])=>el("li",{},el("span",{},dot(s),l),el("span",{class:"me"},lab[s])))),
+      el("div",{style:"margin:14px 0 6px;display:flex;justify-content:space-between"},el("span",{},w.key),el("b",{id:w.id},w.used.toFixed(2)+" / "+w.lim+" $")),
+      el("div",{class:"bar"},el("i",{id:w.id?"sb":null,style:"width:"+Math.min(100,w.used/w.lim*100)+"%"})),
+      el("div",{style:"margin-top:16px;font-weight:600"},"Збої воркера"),
+      w.fails.length?el("ul",{class:"st"},w.fails.map(f=>el("li",{},el("span",{},f[1]),el("span",{class:"me"},f[0])))):el("div",{class:"me",style:"margin-top:6px"},"Збоїв немає")))));
+  testStats().then(s=>{ const n=$("#s3"); if(n)n.textContent=s.spend.toFixed(2)+" / 2 $"; const bar=$("#sb"); if(bar)bar.style.width=Math.min(100,s.spend/2*100)+"%"; });
+}
+</script>
+</body>
+</html>
