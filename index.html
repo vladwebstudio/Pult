@@ -341,7 +341,7 @@ function crm(b){
       el("div",{class:"card kpi"},el("b",{},String(LEADS.filter(l=>l.st==="Оплатив").length)),el("span",{},"оплатили"))),
     el("h2.sec".replace(".sec",""),{class:"sec"},"Що зробити зараз"),
     todo.length?el("div",{class:"todo"},todo.map(item)):el("div",{class:"empty"},"На сьогодні все. Прострочених немає."),
-    ended.length?el("div",{class:"note",style:"margin-top:12px"},"Серію завершено, а рішення немає: "+ended.map(l=>l.name).join(", ")+". Постав «Відмова» або новий етап, щоб серія почалась знову."):null,
+    ended.length?el("div",{class:"note",style:"margin-top:12px"},"Серію завершено, а рішення немає: "+ended.map(l=>l.name).join(", ")+". Постав «Відмова» або новий етап, щоб серія почалась знову."):el("span"),
     el("h2",{class:"sec"},"Новий лід"),
     el("div",{class:"card"},el("div",{class:"row"},el("div",{style:"flex:1.4"},el("label",{class:"l"},"Хто"),name),el("div",{},el("label",{class:"l"},"Канал"),ch),el("div",{},el("label",{class:"l"},"Контакт"),contact),el("div",{},el("label",{class:"l"},"Етап"),st)),
       el("div",{class:"row",style:"margin-top:12px"},el("div",{style:"flex:3"},el("label",{class:"l"},"Нотатка"),note),el("div",{style:"flex:0;min-width:auto"},el("button",{class:"btn",onclick:add},"Додати")))),
@@ -374,7 +374,7 @@ function status(b){
     const dayN=new Date().getDate(), dim=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
     const proj=live&&s.spent>0?s.spent/dayN*dim:null;
     return card({n:sp.name,
-      rows:[["Сайт",sd(sp.id).site||"off"],["Сервер і воркер",hs,live?(hs==="ok"?"працює":hs==="warn"?"є зауваження":"проблема")+(s.hAge!=null?" · перевірено "+ago(s.hAge):"")+(s.hMsg?" · "+s.hMsg:""):null]],
+      rows:[["Сайт",sd(sp.id).site||"off"],["Сервер і воркер",hs,live?(s.hMsg||(hs==="ok"?"працює":hs==="warn"?"є зауваження":"проблема"))+(s.hAge!=null?" · "+ago(s.hAge):""):null]],
       facts:live?[["У черзі й обробці",String(s.queue)],["Помилок за 30 днів",String(s.errCount)],["Остання розмова",s.last?fmtDT(s.last):"—"]]:[],
       warn:live&&s.errCount>0, key:"Витрати ШІ цього місяця",used:live?s.spent:null,lim:s.limit,
       fc:proj!=null?"Прогноз на місяць: ~"+proj.toFixed(2)+" $"+(proj>s.limit?" — перевищить ліміт":""):null,
