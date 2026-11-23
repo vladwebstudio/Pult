@@ -15,31 +15,54 @@
   }
   const LIMIT = 3, DAY_CAP = 2.0, COST = 0.35;
   const css = document.createElement("style");
-  css.textContent = `.tp{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:900;display:flex;align-items:center;gap:12px;padding:8px 10px 8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:999px;box-shadow:var(--sh-lg);font:500 13px var(--font-sans);color:var(--text)}
-.tp__tag{background:#FEF3C7;color:#92400E;border-radius:999px;padding:3px 10px;font-weight:700;font-size:11px;letter-spacing:.06em}
-.tp__m{color:var(--text-muted);font-variant-numeric:tabular-nums}
-.tp button{border:0;border-radius:999px;padding:8px 14px;font:600 13px var(--font-sans);cursor:pointer}
-.tp .p{background:var(--brand);color:#fff}.tp .s{background:var(--brand-soft);color:var(--brand)}
-.tpm{position:fixed;inset:0;z-index:950;background:rgba(10,14,30,.5);display:flex;align-items:center;justify-content:center}
-.tpm__b{width:460px;max-width:92vw;background:var(--surface);color:var(--text);border-radius:var(--r-xl);padding:22px;box-shadow:var(--sh-lg);font:14px var(--font-sans)}
-.tpm__b h3{margin:0 0 14px;font-size:18px}.tpm__b label{display:block;font-size:12px;color:var(--text-muted);margin:10px 0 4px}
-.tpm__b input[type=text],.tpm__b textarea{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg);color:var(--text);font:14px var(--font-sans)}
-.tpm__b textarea{min-height:90px;resize:vertical}.tpm__n{font-size:12px;color:var(--text-faint);margin-top:10px}.tpm__e{color:var(--danger);font-size:13px;margin-top:8px}
-.tpm__r{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.tpm__r button{border:0;border-radius:999px;padding:9px 16px;font:600 13px var(--font-sans);cursor:pointer}`;
+  css.textContent = `
+.tp{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:900;display:flex;align-items:center;gap:6px;padding:6px;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:999px;box-shadow:var(--sh-lg);transition:transform .3s var(--ease),opacity .25s}
+.tp.is-min{transform:translate(-50%,0) scale(1)}
+.tp button{border:0;border-radius:999px;padding:10px 18px;font:600 13px var(--font-sans);cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s,color .15s}
+.tp .p{background:var(--brand);color:#fff}.tp .p:hover{transform:translateY(-1px);box-shadow:0 6px 16px color-mix(in srgb,var(--brand) 38%,transparent)}
+.tp .s{background:transparent;color:var(--text)}.tp .s:hover{background:var(--brand-soft);color:var(--brand)}
+.tp .h{width:36px;height:36px;padding:0;background:transparent;color:var(--text-muted);font-size:15px}.tp .h:hover{background:var(--surface-2);color:var(--text)}
+.tp__w{display:flex;align-items:center;gap:6px;max-width:520px;overflow:hidden;transition:max-width .3s var(--ease),opacity .2s}
+.tp.is-min .tp__w{max-width:0;opacity:0;pointer-events:none}.tp.is-min .h{transform:rotate(180deg)}
+.tpm{position:fixed;inset:0;z-index:950;background:rgba(10,14,30,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;animation:tpf .15s}
+.tpm__b{width:480px;max-width:92vw;background:var(--surface);color:var(--text);border-radius:22px;padding:26px;box-shadow:var(--sh-lg);font:14px var(--font-sans);animation:tpp .2s var(--ease)}
+@keyframes tpf{from{opacity:0}}@keyframes tpp{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.tpm__b h3{margin:0 0 6px;font-size:20px;letter-spacing:-.02em}.tpm__sub{color:var(--text-muted);font-size:13px;margin-bottom:14px}
+.tpm__b label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin:14px 0 5px}
+.tpm__b input[type=text],.tpm__b textarea{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font:14px var(--font-sans);outline:none;transition:border-color .15s,box-shadow .15s}
+.tpm__b input[type=text]:hover,.tpm__b textarea:hover{border-color:var(--border-strong)}
+.tpm__b input[type=text]:focus,.tpm__b textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 20%,transparent)}
+.tpm__b textarea{min-height:84px;resize:vertical}
+.dz{display:flex;align-items:center;gap:14px;padding:16px;border:2px dashed var(--border-strong);border-radius:16px;cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+.dz:hover,.dz.over{border-color:var(--brand);background:var(--brand-soft)}.dz.over{transform:scale(1.01)}
+.dz.has{border-style:solid;border-color:color-mix(in srgb,#22C55E 60%,var(--border));background:color-mix(in srgb,#22C55E 8%,var(--surface))}
+.dz__i{width:42px;height:42px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+.dz.has .dz__i{background:color-mix(in srgb,#22C55E 18%,var(--surface));color:#15803D}
+.dz b{display:block;font-size:14px}.dz small{color:var(--text-muted);font-size:12px}
+.dz input{display:none}
+.tpm__n{font-size:12px;color:var(--text-faint);margin-top:12px}.tpm__e{color:var(--danger);font-size:13px;margin-top:8px;min-height:16px}
+.tpm__r{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.tpm__r button{border:0;border-radius:999px;padding:10px 18px;font:600 13px var(--font-sans);cursor:pointer;transition:transform .15s,box-shadow .15s,background .15s}
+.tpm__r .p{background:var(--brand);color:#fff}.tpm__r .p:hover{transform:translateY(-1px);box-shadow:0 6px 16px color-mix(in srgb,var(--brand) 35%,transparent)}.tpm__r .s{background:var(--brand-soft);color:var(--brand)}.tpm__r .s:hover{filter:brightness(.97)}`;
   document.head.appendChild(css);
   const today = ()=>new Date().toISOString().slice(0,10);
   const bar = document.createElement("div"); bar.className="tp"; bar.style.display="none"; document.body.appendChild(bar);
   let db = null, N = 0, SPEND = 0;
+  const MIN_KEY="tpMin";
   async function refresh(){
     const [cs, sp] = await Promise.all([db.collection("calls").get(), db.collection("settings").doc("testSpend").get()]);
     N = cs.size; const s = sp.exists ? sp.data() : {}; SPEND = s.d===today() ? (s.v||0) : 0; paint();
   }
   function paint(){
     bar.style.display="flex";
-    bar.innerHTML = '<span class="tp__m">Розмов: '+N+' з '+LIMIT+'</span><span class="tp__m">ШІ сьогодні: '+SPEND.toFixed(2)+' / '+DAY_CAP.toFixed(2)+' $</span>';
+    let min=false; try{ min=localStorage.getItem(MIN_KEY)==="1"; }catch(_){}
+    bar.classList.toggle("is-min",min);
+    bar.replaceChildren();
+    const w=document.createElement("div"); w.className="tp__w";
     const a = document.createElement("button"); a.className="p"; a.textContent="+ Додати розмову"; a.onclick=openAdd;
     const b = document.createElement("button"); b.className="s"; b.textContent="Посилання клієнту"; b.onclick=share;
-    bar.append(a,b);
+    const h = document.createElement("button"); h.className="h"; h.title="Сховати / показати меню"; h.textContent="‹"; h.style.transform=min?"rotate(180deg)":"";
+    h.onclick=()=>{ const m=!bar.classList.contains("is-min"); bar.classList.toggle("is-min",m); h.style.transform=m?"rotate(180deg)":""; try{ localStorage.setItem(MIN_KEY,m?"1":"0"); }catch(_){} };
+    w.append(a,b); bar.append(h,w);
   }
   function modal(inner){ const m=document.createElement("div"); m.className="tpm"; m.innerHTML='<div class="tpm__b">'+inner+'</div>'; m.onclick=e=>{ if(e.target===m) m.remove(); }; document.body.appendChild(m); return m; }
   async function saveCall(id, pack){
@@ -48,11 +71,18 @@
     await db.collection("calls").doc(id).collection("analysis").doc("main").set(pack.analysis);
   }
   function openAdd(){
-    const m = modal('<h3>Додати розмову клієнта</h3><label>Ім’я клієнта</label><input type="text" id="tpN" placeholder="Напр. Олена, коуч">'+
-      '<label>Запис розмови (аудіо)</label><input type="file" id="tpF" accept="audio/*,video/*">'+
-      '<label>Скрипт для цього розбору (разово)</label><textarea id="tpS" placeholder="Вставте скрипт клієнта або залиште порожнім"></textarea>'+
-      '<div class="tpm__n">Поки розбір шаблонний: файл не завантажується. Справжня транскрипція і ШІ-оцінка підключаться через сервер.</div><div class="tpm__e" id="tpE"></div>'+
+    const m = modal('<h3>Додати розмову клієнта</h3><div class="tpm__sub">Розбір з’явиться в цьому просторі, а клієнту піде лише посилання.</div>'+
+      '<label>Ім’я клієнта</label><input type="text" id="tpN" placeholder="Напр. Олена, коуч">'+
+      '<label>Запис розмови</label><label class="dz" id="tpDz"><span class="dz__i">♪</span><span><b id="tpFn">Обери файл або перетягни сюди</b><small id="tpFs">Аудіо чи відео, до кількох годин</small></span><input type="file" id="tpF" accept="audio/*,video/*"></label>'+
+      '<label>Скрипт для цього розбору</label><textarea id="tpS" placeholder="Вставте скрипт клієнта або залиште порожнім"></textarea>'+
+      '<div class="tpm__n">Поки розбір шаблонний: файл не завантажується. Справжня транскрипція і оцінка ШІ підключаться через сервер.</div><div class="tpm__e" id="tpE"></div>'+
       '<div class="tpm__r"><button class="s" id="tpC">Скасувати</button><button class="p" id="tpOk">Розібрати</button></div>');
+    const dz=m.querySelector("#tpDz"), fi=m.querySelector("#tpF");
+    const show=f=>{ if(!f)return; dz.classList.add("has"); m.querySelector("#tpFn").textContent=f.name; m.querySelector("#tpFs").textContent=(f.size/1048576).toFixed(1)+" МБ"; m.querySelector(".dz__i").textContent="✓"; };
+    fi.onchange=()=>show(fi.files[0]);
+    ["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over")}));
+    ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over")}));
+    dz.addEventListener("drop",e=>{ const f=e.dataTransfer.files[0]; if(f){ try{ const dt=new DataTransfer(); dt.items.add(f); fi.files=dt.files; }catch(_){} show(f); } });
     m.querySelector("#tpC").onclick=()=>m.remove();
     m.querySelector("#tpOk").onclick=async()=>{
       const err=t=>m.querySelector("#tpE").textContent=t;
