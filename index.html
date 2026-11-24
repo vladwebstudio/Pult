@@ -342,6 +342,7 @@ function spaces(b){
   b.append(el("h1",{},"Робочі простори"),el("div",{class:"sub"},"Кожен простір — окремий сайт зі своєю базою. Тут посилання і живі цифри з їхніх баз."),
     el("div",{class:"grid"},SPACES().map(sp2),
       tile({name:"Тест",kind:"Тест",cls:"test",href:"test.html",nums:[[TS.calls==null?"…":String(TS.calls),"розмов за період"],[TS.calls==null?"…":String(TS.shared),"посилань за період"],[TS.calls==null?"…":TS.spend.toFixed(2)+" $","ШІ сьогодні"]]}),
+      tile({name:"Демо",kind:"Статичний приклад",cls:"test",href:"demo.html",extra:el("div",{class:"note"},"Копія Алекси на заморожених даних: 30 твоїх розмов, переіменовані менеджери. Без бази, для показу клієнтам.")}),
       el("div",{class:"card tile add",onclick:addSpaceModal,title:"Додати робочий простір"},el("i",{},"+"),el("span",{},"Додати простір"))));
 }
 
