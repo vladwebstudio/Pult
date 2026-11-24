@@ -25,8 +25,18 @@
     if(Array.isArray(v))return v.map(rev);
     const o={}; Object.keys(v).forEach(k=>o[k]=rev(v[k])); return o;
   };
-  Object.keys(E).forEach(k=>D.set(k,rev(E[k])));
+  /* у демо лише завершені розмови: без «в ефірі», скасованих і порожніх */
+  const skip=new Set(); Object.keys(E).forEach(k=>{ if(/^calls\/[^/]+$/.test(k)){ const st=E[k].status; if(st!=="done"&&st!=="no_show") skip.add(k); } });
+  /* витрати ШІ: найновіший місяць стає поточним */
+  const um=Object.keys(E).filter(k=>/^usage\/\d{4}-\d\d$/.test(k)).sort(), now=new Date(), ym=(d)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"), rk={};
+  um.forEach((k,i)=>{ rk[k]="usage/"+ym(new Date(now.getFullYear(),now.getMonth()-(um.length-1-i),1)); });
+  Object.keys(E).forEach(k=>{ const top=k.split("/").slice(0,2).join("/"); if(skip.has(top))return; D.set(rk[k]||k,rev(E[k])); });
   D.set("users/vlad@demo.local",{email:"vlad@demo.local",name:"Влад",role:"developer",status:"active"});
+  /* «сервер» і «воркер» завжди живі */
+  const beat=()=>{ try{ const f=firebase.firestore(), t=new TS(Date.now());
+    f.collection("health").doc("server").update({checkedAt:t,updatedAt:t,status:"ok",message:"Усе працює"});
+    f.collection("health").doc("worker").update({lastBeat:t}); }catch(_){} };
+  beat(); setInterval(beat,60000);
   window.__DEMO_STATIC=true;
   document.addEventListener("DOMContentLoaded",()=>{
     const st=document.createElement("style");
