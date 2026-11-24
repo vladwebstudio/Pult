@@ -30,7 +30,7 @@
   /* витрати ШІ: найновіший місяць стає поточним */
   const um=Object.keys(E).filter(k=>/^usage\/\d{4}-\d\d$/.test(k)).sort(), now=new Date(), ym=(d)=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"), rk={};
   um.forEach((k,i)=>{ rk[k]="usage/"+ym(new Date(now.getFullYear(),now.getMonth()-(um.length-1-i),1)); });
-  Object.keys(E).forEach(k=>{ const top=k.split("/").slice(0,2).join("/"); if(skip.has(top))return; D.set(rk[k]||k,rev(E[k])); });
+  Object.keys(E).forEach(k=>{ const top=k.split("/").slice(0,2).join("/"); if(skip.has(top))return; const v=rev(E[k]); if(/^calls\/[^/]+$/.test(k)&&v.videoId){ v.audioReady=false; v.embeddable=true; } D.set(rk[k]||k,v); });
   D.set("users/vlad@demo.local",{email:"vlad@demo.local",name:"Влад",role:"developer",status:"active"});
   /* «сервер» і «воркер» завжди живі */
   const beat=()=>{ try{ const f=firebase.firestore(), t=new TS(Date.now());
